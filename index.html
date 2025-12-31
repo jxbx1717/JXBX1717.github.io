@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>2026元旦快乐 - 绚丽烟花+祝福弹幕</title>
+    
+    <!-- 微信分享元标签 -->
+    <meta property="og:title" content="2026元旦快乐 | 烟花贺新年" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://x30.top/1254" />
+    <meta property="og:image" content="https://x30.top/1254/preview.jpg" />
+    <meta property="og:description" content="2026元旦快乐，愿新年胜旧年，万事皆顺遂！" />
+    
+    <!-- 微信浏览器适配 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            background: #0a0a18;
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+        canvas { display: block; }
+        
+        /* 元旦文字 */
+        .text-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+        h1 {
+            font-size: clamp(2.5rem, 10vw, 5rem);
+            color: #ffd700;
+            text-shadow: 0 0 15px #ffd700, 0 0 30px #ff9500;
+            margin: 0;
+        }
+        p {
+            font-size: clamp(1.2rem, 5vw, 2.2rem);
+            color: #ff4757;
+            text-shadow: 0 0 10px #ff4757, 0 0 20px #ff6b81;
+            margin-top: 0.5rem;
+        }
+        
+        /* 祝福弹幕 */
+        .barrage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 15;
+            overflow: hidden;
+        }
+        .barrage-item {
+            position: absolute;
+            white-space: nowrap;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0,0,0,0.8);
+            opacity: 0;
+            animation: barrageMove linear forwards;
+        }
+        
+        /* 加载提示 */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 18px;
+            z-index: 20;
+        }
+        
+        /* 弹幕动画 */
+        @keyframes barrageMove {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">加载中...🎆</div>
+    <canvas id="fireworksCanvas"></canvas>
+    <div class="text-container" id="textContainer" style="display: none;">
+        <h1>元旦快乐</h1>
+        <p>2026 万事顺遂</p>
+    </div>
+    <div class="barrage" id="barrage"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ========== 基础配置 ==========
+            const canvas = document.getElementById('fireworksCanvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const loading = document.getElementById('loading');
+            const textContainer = document.getElementById('textContainer');
+            const barrageContainer = document.getElementById('barrage');
+            let W, H;
+
+            // 适配屏幕大小
+            function resize() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            // ========== 祝福弹幕配置 ==========
+            // 祝福文案库
+            const blessingTexts = [
+                "2026元旦快乐✨", "新年大吉大利🧧", "万事顺遂🍀", "阖家幸福👨‍👩‍👧‍👦",
+                "暴富暴美💰", "平安喜乐❤️", "前程似锦🌟", "岁岁年年皆胜意🎊",
+                "所求皆如愿🙏", "日子滚烫，我们来日方长🔥"
+            ];
+            // 弹幕颜色库
+            const barrageColors = [
+                "#ffd700", "#ff4757", "#00ff9d", "#7b68ee", "#ff8c00", "#00ffff", "#ff69b4"
+            ];
+
+            // 创建单条弹幕
+            function createBarrage() {
+                const text = blessingTexts[Math.floor(Math.random() * blessingTexts.length)];
+                const color = barrageColors[Math.floor(Math.random() * barrageColors.length)];
+                const top = Math.random() * (H - 60) + 30; // 垂直位置
+                const duration = 8 + Math.random() * 6; // 动画时长
+                const fontSize = Math.random() * 10 + 16; // 字体大小
+
+                const barrageItem = document.createElement('div');
+                barrageItem.className = 'barrage-item';
+                barrageItem.innerText = text;
+                barrageItem.style.color = color;
+                barrageItem.style.top = `${top}px`;
+                barrageItem.style.fontSize = `${fontSize}px`;
+                barrageItem.style.animationDuration = `${duration}s`;
+
+                barrageContainer.appendChild(barrageItem);
+
+                // 动画结束后移除
+                setTimeout(() => {
+                    barrageItem.remove();
+                }, duration * 1000);
+            }
+
+            // 定时生成弹幕
+            function startBarrage() {
+                // 初始批量生成
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(createBarrage, i * 1000);
+                }
+                // 持续生成
+                setInterval(createBarrage, 1500);
+            }
+
+            // ========== 绚丽烟花配置 ==========
+            // 粒子池（扩容但保持性能）
+            const particles = [];
+            const poolSize = 1200; // 适度扩容，保证绚丽度
+            for (let i = 0; i < poolSize; i++) {
+                particles.push({ active: false });
+            }
+
+            // 获取空闲粒子
+            function getParticle() {
+                for (let p of particles) {
+                    if (!p.active) {
+                        p.active = true;
+                        return p;
+                    }
+                }
+                return null;
+            }
+
+            // 生成渐变彩色（更绚丽的颜色算法）
+            function randomColor() {
+                // 高饱和、高亮度的节日色系
+                const hue = Math.random() * 360;
+                const saturation = 80 + Math.random() * 20;
+                const lightness = 50 + Math.random() * 20;
+                return `hsla(${hue}, ${saturation}%, ${lightness}%, 1)`;
+            }
+
+            // 生成烟花（双层粒子：核心亮粒子+外围淡粒子）
+            function launchFirework() {
+                const x = Math.random() * W;
+                const coreColor = randomColor();
+                const outerColor = `${coreColor.slice(0, -3)}0.7)`; // 外围粒子半透明
+
+                // 核心粒子（更亮、更大、速度慢）
+                const coreCount = 60 + Math.floor(Math.random() * 40);
+                for (let i = 0; i < coreCount; i++) {
+                    const p = getParticle();
+                    if (!p) break;
+
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 1 + Math.random() * 2;
+
+                    p.x = x;
+                    p.y = H;
+                    p.vx = Math.cos(angle) * speed;
+                    p.vy = Math.sin(angle) * speed - 5; // 更强的上升力
+                    p.gravity = 0.02; // 更缓的重力，烟花飞得更高
+                    p.alpha = 1;
+                    p.decay = 0.003 + Math.random() * 0.003; // 更慢的消失速度
+                    p.color = coreColor;
+                    p.size = 1.5 + Math.random() * 2; // 更大的粒子尺寸
+                }
+
+                // 外围粒子（更淡、更小、速度快）
+                const outerCount = 40 + Math.floor(Math.random() * 30);
+                for (let i = 0; i < outerCount; i++) {
+                    const p = getParticle();
+                    if (!p) break;
+
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 2 + Math.random() * 3;
+
+                    p.x = x;
+                    p.y = H;
+                    p.vx = Math.cos(angle) * speed;
+                    p.vy = Math.sin(angle) * speed - 5.5;
+                    p.gravity = 0.025;
+                    p.alpha = 1;
+                    p.decay = 0.005 + Math.random() * 0.004;
+                    p.color = outerColor;
+                    p.size = 0.8 + Math.random() * 1.2;
+                }
+            }
+
+            // 绘制烟花（添加径向渐变，更绚丽）
+            function animateFireworks() {
+                // 半透明背景，保留烟花轨迹
+                ctx.fillStyle = 'rgba(10, 10, 24, 0.08)';
+                ctx.fillRect(0, 0, W, H);
+
+                for (let p of particles) {
+                    if (!p.active) continue;
+
+                    // 更新粒子位置
+                    p.vy += p.gravity;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.alpha -= p.decay;
+
+                    if (p.alpha <= 0) {
+                        p.active = false;
+                        continue;
+                    }
+
+                    // 径向渐变绘制（核心亮、边缘淡）
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    const gradient = ctx.createRadialGradient(
+                        p.x, p.y, 0,
+                        p.x, p.y, p.size * 2
+                    );
+                    gradient.addColorStop(0, p.color);
+                    gradient.addColorStop(1, `${p.color.slice(0, -3)}0)`);
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                requestAnimationFrame(animateFireworks);
+            }
+
+            // ========== 启动逻辑 ==========
+            setTimeout(() => {
+                // 隐藏加载、显示主内容
+                loading.style.display = 'none';
+                textContainer.style.display = 'block';
+                
+                // 启动烟花和弹幕
+                animateFireworks();
+                startBarrage();
+
+                // 提高烟花发射频率（更密集、更绚丽）
+                setInterval(launchFirework, 500);
+                
+                // 初始连发烟花
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(launchFirework, i * 200);
+                }
+            }, 800);
+
+            // 检测微信环境
+            const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+            if (isWeChat) {
+                console.log('微信环境已适配 ✅');
+            }
+        });
+    </script>
+</body>
+</html>
